@@ -1,0 +1,28 @@
+server:
+  port: 12000
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/db_demo_user?serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      web-stat-filter:        # 监控web
+        enabled: true
+      stat-view-servlet:      # Druid监控页面: /druid/login.html
+        enabled: true
+        login-username: root  # 用户名
+        login-password: root  # 密码
+#      connect-timeout:
+
+mybatis-plus:
+  mapper-locations: classpath:mybatis/mapper/*/*.xml
+  configuration:
+    map-underscore-to-camel-case: true  # 自动驼峰转换
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

@@ -12,6 +12,9 @@
         <module>api-gateway</module>
         <module>auth-server</module>
         <module>captcha-server</module>
+        <module>user-server</module>
+        <module>user-server-common</module>
+        <module>commons</module>
     </modules>
     <packaging>pom</packaging>
     <description>a demo for cloud project</description>

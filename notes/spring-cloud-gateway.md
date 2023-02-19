@@ -45,3 +45,80 @@ Predicate来自于Java8的接口，Predicate接收一个输入参数，返回一
   - RemoteAddrRoutePredicateFactory:请求远程地址是否匹配值，匹配返回True
 - Weight(请求权重)
   - WeightRoutePredicateFactory:请求按照权重分组，路由到不同的目标URI
+
+## Filter
+在网关(Spring-Cloud-Gateway)中Filter有两种:
+1. PRE:该过滤器在请求被路由到目标URI之前调用，常用的场景是：身份验证，记录调试信息等等。
+2. POST：该过滤器在请求被上游的微服务所响应后，常用来添加一些标准的响应报文头等。
+
+在网关(Spring-Cloud-Gateway)中Filter的作用范围有两种：
+1. 局部路由Filter:该过滤器只被应用到单个路由或者一个分组的路由上。需要在配置文件中配置。
+2. 全局路由Filter:应用到所有的路由上。无需配置，全局生效。
+
+### 内置的局部过滤器
+- header
+  - AddRequestHeaderGatewayFilterFactory:添加请求头
+  - RemoveRequestHeaderGatewayFilterFactory:移除请求头
+  - AddResponseHeaderGatewayFilterFactory:添加响应头
+  - RemoveResponseHeaderGatewayFilterFactory:移除响应头
+  - SetResponseHeaderGatewayFilterFactory:设置响应头
+  - SecureHeadersGatewayFilterFactory:安全头
+  - PreserveHostGatewayFilterFactory:保留原请求头
+  - RemoveNonProxyHeadersGatewayFilterFactory:删除重置的请求头
+- path
+  - RewritePathGatewayFilterFactory:重写请求路径
+  - SetPathGatewayFilterFactory:设置路径
+  - StripPrefixGatewayFilterFactory:去掉前缀路径
+  - PrefixPathGatewayFilterFactory:
+- param
+  - AddRequestParameterGatewayFilterFactory:添加请求参数
+- session
+  - SaveSessionGatewayFilterFactory:保存Session
+- status
+  - SetStatusGatewayFilterFactory:设置响应状态
+- retry
+  - RetryGatewayFilterFactory:重试
+- other
+  - HystrixGatewayFilterFactory:
+  - RequestRateLimiterGatewayFilterFactory:
+  - RedirectToGatewayFilterFactory:
+### 自定义过滤器和过滤器工厂
+
+### 内置的全局过滤器
+
+# 集成注册中心nacos
+如果不集成注册中心，那么上游服务的服务地址需要写死在我们的配置文件中。一旦上游服务地址变更，那么业务网关的配置也得变更。并且无法实现负载均衡。
+1.引入依赖
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+```
+2.启动注册中心
+```java
+@EnableDiscoveryClient(autoRegister = true)
+```
+3.添加配置
+```yaml
+spring:
+  application:
+    name: api
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-server  # lb://serviceName  启动负载均衡方式动态转发到目标URI,这里使用了全局过滤器:LoadBalancerClientFilter
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - AddRequestHeader=gatewayAdd,chimera
+            - StripPath=2
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        register-enabled: true
+```
+
+# 自定义Gateway全局异常处理器

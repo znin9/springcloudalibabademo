@@ -8,17 +8,15 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth-server  #路由标识，要求唯一，名称任意
-          uri: http://localhost:10000  #请求最终被转发到的目标地址
+        - id: auth-service
+          uri: lb://auth-server
           predicates:
             - Path=/api/auth/**
-            - Weight=group1,8  # 第一个group1是分组名，第二个8是权重
           filters:
-            - StripPrefix=2  # 去除原始请求路径中的前2级路径
-        - id: captcha-server
-          uri: http://localhost:11000
-          predicates:
-            - Path=/api/captcha/**
-            - Weight=group1,2  #同一分组按照权重分配流量
-          filters:
+            - AddRequestHeader=gatewayAdd,chimera
             - StripPrefix=2
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        register-enabled: true
